@@ -32,8 +32,8 @@
     body {
       background:
         linear-gradient(rgba(0,0,0,.10), rgba(0,0,0,.22)),
-        url('papier.jpg') repeat fixed;
-      background-size: auto, 420px auto;
+        url('papier-tile.jpg') repeat fixed;
+      background-size: auto, 840px auto;
     }
   }
 
@@ -163,7 +163,7 @@
   /* ---------- Erreur ---------- */
   .err {
     position: fixed;
-    left: 50%; top: calc(14px + env(safe-area-inset-top));
+    left: 50%;
     transform: translateX(-50%);
     color: #fff;
     background: rgba(180,30,30,.85);
@@ -294,6 +294,8 @@ let failPool = [];
 
 function fail() {
   if (!failPool.length) failPool = [...FAIL_MSGS].sort(() => Math.random() - .5);
+  const r = postit.getBoundingClientRect();
+  err.style.top = Math.min(r.bottom + 8, innerHeight - 56) + 'px';
   err.textContent = failPool.pop();
   err.classList.add('show');
   postit.classList.remove('shake');
