@@ -426,6 +426,7 @@ const FAIL_MSGS = [
 ];
 let failPool = [];
 let fails = 0;
+let errTimer = null;
 
 function fail() {
   if (!failPool.length) failPool = [...FAIL_MSGS].sort(() => Math.random() - .5);
@@ -433,11 +434,14 @@ function fail() {
   const r = postit.getBoundingClientRect();
   err.style.top = Math.min(r.bottom + 8, innerHeight - 56) + 'px';
   err.textContent = failPool.pop();
+  err.classList.remove('show');
+  void err.offsetWidth;
   err.classList.add('show');
   postit.classList.remove('shake');
   void postit.offsetWidth;
   postit.classList.add('shake');
-  setTimeout(() => err.classList.remove('show'), 2600);
+  clearTimeout(errTimer);
+  errTimer = setTimeout(() => err.classList.remove('show'), 2600);
 }
 
 // --- recentrer le post-it dans la zone visible quand le clavier s'ouvre ---
