@@ -19,7 +19,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 22px;
     padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
     font-family: 'Kalam', 'Comic Sans MS', cursive;
     background:
@@ -29,23 +28,11 @@
     overflow-x: hidden;
   }
 
-  .hint {
-    background: rgba(0,0,0,.55);
-    color: #fff;
-    font-size: 15px;
-    line-height: 1.45;
-    text-align: center;
-    padding: 10px 16px;
-    border-radius: 14px;
-    max-width: 340px;
-    backdrop-filter: blur(4px);
-  }
-
   /* ---------- Post-it ---------- */
   .postit {
     position: relative;
     width: min(88vw, 340px);
-    padding: 34px 22px 26px;
+    padding: 36px 20px 28px;
     background: linear-gradient(160deg, #fff7a1 0%, #ffef75 70%, #f9e966 100%);
     border-radius: 3px;
     box-shadow: 0 14px 30px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.3);
@@ -74,16 +61,16 @@
     justify-content: center;
     align-items: baseline;
     gap: 10px;
-    margin: 6px 0;
-    min-height: 42px;
+    margin: 8px 0;
+    min-height: 44px;
   }
 
   .ink {
     font-family: 'Kalam', 'Comic Sans MS', cursive;
     font-weight: 700;
     color: #2b3a8f;
-    font-size: clamp(22px, 6.5vw, 28px);
-    letter-spacing: .04em;
+    font-size: clamp(21px, 6.2vw, 27px);
+    letter-spacing: .02em;
   }
 
   input.word {
@@ -102,40 +89,48 @@
     transition: background .2s, border-color .2s;
   }
   input.word:focus { background: rgba(255,255,255,.5); border-bottom-color: #2b3a8f; }
-  input.word::placeholder { color: rgba(43,58,143,.25); }
+  input.word.filled { background: none; border-bottom-color: transparent; }
+  input.word.filled:focus { background: rgba(255,255,255,.35); }
 
   /* ---------- Emojis ---------- */
-  .line.emojis { gap: 10px; margin-top: 10px; }
+  .line.emojis { gap: 12px; margin-top: 12px; }
   .slot {
     width: 48px; height: 48px;
-    font-size: 26px;
+    font-size: 30px;
     line-height: 1;
     display: flex; align-items: center; justify-content: center;
     background: rgba(255,255,255,.25);
     border: 2px dashed rgba(43,58,143,.45);
     border-radius: 50%;
     cursor: pointer;
-    color: rgba(43,58,143,.5);
     font-family: 'Kalam', cursive;
+    padding: 0;
   }
   .slot:active { transform: scale(.92); }
+  .slot.filled { background: none; border-color: transparent; font-size: 34px; }
 
-  /* ---------- Palette ---------- */
+  /* ---------- Tooltip palette ---------- */
   .palette {
     position: fixed;
-    left: 50%; bottom: calc(14px + env(safe-area-inset-bottom));
-    transform: translateX(-50%);
-    width: min(92vw, 360px);
     background: rgba(255,255,252,.97);
-    border-radius: 18px;
-    box-shadow: 0 12px 40px rgba(0,0,0,.5);
-    padding: 12px;
+    border-radius: 16px;
+    box-shadow: 0 10px 34px rgba(0,0,0,.5);
+    padding: 10px;
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(6, 44px);
+    gap: 4px;
     z-index: 20;
   }
   .palette[hidden] { display: none; }
+  .palette::after {
+    content: '';
+    position: absolute;
+    left: var(--arrow-x, 50%);
+    transform: translateX(-50%);
+    border: 9px solid transparent;
+  }
+  .palette:not(.above)::after { top: -17px; border-bottom-color: rgba(255,255,252,.97); }
+  .palette.above::after { bottom: -17px; border-top-color: rgba(255,255,252,.97); }
   .palette button {
     font-size: 26px;
     padding: 8px 0;
@@ -145,32 +140,21 @@
     cursor: pointer;
   }
   .palette button:active { background: rgba(0,0,0,.08); }
-  .palette .clear { font-size: 20px; color: #b00; }
 
-  /* ---------- Bouton ---------- */
-  .go {
-    font-family: 'Kalam', cursive;
-    font-size: 20px;
-    font-weight: 700;
-    color: #fff;
-    background: rgba(0,0,0,.6);
-    border: 2px solid rgba(255,255,255,.65);
-    border-radius: 999px;
-    padding: 12px 30px;
-    cursor: pointer;
-    backdrop-filter: blur(4px);
-  }
-  .go:active { transform: scale(.96); }
-
+  /* ---------- Erreur ---------- */
   .err {
-    min-height: 22px;
+    position: fixed;
+    left: 50%; bottom: calc(20px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
     color: #fff;
-    background: rgba(180,30,30,.75);
+    background: rgba(180,30,30,.85);
     font-size: 15px;
-    padding: 4px 14px;
-    border-radius: 10px;
+    padding: 6px 16px;
+    border-radius: 12px;
     opacity: 0;
     transition: opacity .25s;
+    white-space: nowrap;
+    z-index: 25;
   }
   .err.show { opacity: 1; }
 
@@ -213,33 +197,29 @@
 </head>
 <body>
 
-<div class="hint">🔒 Un message t'attend…<br>Recopie ce qui est écrit sur le post-it du cadeau&nbsp;!</div>
-
 <form id="lock" autocomplete="off">
   <div class="postit" id="postit">
     <div class="line ink">
-      <input class="word" id="w1" maxlength="4"  style="width:4.6ch"  placeholder="····"  enterkeyhint="next" autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="mot 1">
-      <input class="word" id="w2" maxlength="8"  style="width:8.6ch"  placeholder="········" enterkeyhint="next" autocapitalize="characters" autocorrect="off" spellcheck="false" aria-label="mot 2">
+      <input class="word" id="w1" maxlength="4"  style="width:5ch"    enterkeyhint="next" autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="mot 1">
+      <input class="word" id="w2" maxlength="8"  style="width:10.5ch" enterkeyhint="next" autocapitalize="characters" autocorrect="off" spellcheck="false" aria-label="mot 2">
     </div>
     <div class="line ink">
-      <input class="word" id="w3" maxlength="6"  style="width:6.6ch"  placeholder="······" enterkeyhint="next" autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="mot 3">
+      <input class="word" id="w3" maxlength="6"  style="width:7.5ch"  enterkeyhint="next" autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="mot 3">
     </div>
     <div class="line ink">
-      <input class="word" id="w4" maxlength="12" style="width:12.4ch" placeholder="············" enterkeyhint="done" autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="mot 4">
+      <input class="word" id="w4" maxlength="12" style="width:14ch"   enterkeyhint="done" autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="mot 4">
     </div>
     <div class="line emojis">
-      <button type="button" class="slot" data-i="0" aria-label="emoji 1">?</button>
-      <button type="button" class="slot" data-i="1" aria-label="emoji 2">?</button>
-      <button type="button" class="slot" data-i="2" aria-label="emoji 3">?</button>
-      <button type="button" class="slot" data-i="3" aria-label="emoji 4">?</button>
-      <button type="button" class="slot" data-i="4" aria-label="emoji 5">?</button>
+      <button type="button" class="slot" data-i="0" aria-label="emoji 1"></button>
+      <button type="button" class="slot" data-i="1" aria-label="emoji 2"></button>
+      <button type="button" class="slot" data-i="2" aria-label="emoji 3"></button>
+      <button type="button" class="slot" data-i="3" aria-label="emoji 4"></button>
+      <button type="button" class="slot" data-i="4" aria-label="emoji 5"></button>
     </div>
   </div>
 </form>
 
 <div class="err" id="err"></div>
-<button class="go" id="go" type="submit" form="lock">🔓 Écouter le message</button>
-
 <div class="palette" id="palette" hidden></div>
 
 <div class="success" id="success" hidden>
@@ -250,11 +230,9 @@
   <a href="message.m4a" download>⬇️ Garder le message</a>
 </div>
 
-<audio id="preload" src="message.m4a" preload="auto" style="display:none"></audio>
-
 <script>
 const EXPECTED = '6f2f328fce79f798d03cb897db633b384795c4a33d1c37791a73bc64be513d85';
-const EMOJIS = ['🎈','🎂','🎉','🎁','💐','🥳','🍾','❤️','🌸','⭐','🎊','🍰'];
+const EMOJIS = ['🎁','💐','⭐','🎂','🥳','🌸','🎈','🎊','❤️','🍾','🍰','🎉'];
 
 const words = ['w1','w2','w3','w4'].map(id => document.getElementById(id));
 const slots = [...document.querySelectorAll('.slot')];
@@ -263,17 +241,26 @@ const palette = document.getElementById('palette');
 const err = document.getElementById('err');
 const postit = document.getElementById('postit');
 let activeSlot = 0;
+let lastFailed = '';
 
-// --- auto-avance quand un mot est complet + capitalisation façon post-it ---
+// --- saisie : capitalisation + indicateur qui s'efface + auto-avance ---
 words.forEach((w, i) => {
   w.addEventListener('input', () => {
-    if (i === 1) w.value = w.value.toUpperCase();              // AMANDINE tout en majuscules
+    if (i === 1) w.value = w.value.toUpperCase();
     else if (w.value) w.value = w.value[0].toUpperCase() + w.value.slice(1);
+    w.classList.toggle('filled', !!w.value);
     if (w.value.length >= +w.maxLength && i < words.length - 1) words[i + 1].focus();
+    maybeUnlock();
+  });
+  w.addEventListener('keydown', ev => {
+    if (ev.key === 'Enter') {
+      ev.preventDefault();
+      i < words.length - 1 ? words[i + 1].focus() : w.blur();
+    }
   });
 });
 
-// --- palette emojis ---
+// --- palette emojis en tooltip ---
 EMOJIS.forEach(e => {
   const b = document.createElement('button');
   b.type = 'button';
@@ -281,35 +268,47 @@ EMOJIS.forEach(e => {
   b.onclick = () => pickEmoji(e);
   palette.appendChild(b);
 });
-const clearBtn = document.createElement('button');
-clearBtn.type = 'button';
-clearBtn.textContent = '⌫';
-clearBtn.className = 'clear';
-clearBtn.onclick = () => pickEmoji(null);
-palette.appendChild(clearBtn);
 
-slots.forEach(s => s.onclick = () => {
-  activeSlot = +s.dataset.i;
+function openPalette(slot) {
+  activeSlot = +slot.dataset.i;
   palette.hidden = false;
-});
+  const r = slot.getBoundingClientRect();
+  const pw = palette.offsetWidth, ph = palette.offsetHeight;
+  let left = r.left + r.width / 2 - pw / 2;
+  left = Math.max(8, Math.min(left, innerWidth - pw - 8));
+  let top = r.bottom + 14;
+  let above = false;
+  if (top + ph > innerHeight - 8) { top = r.top - ph - 14; above = true; }
+  palette.style.left = left + 'px';
+  palette.style.top = top + 'px';
+  palette.classList.toggle('above', above);
+  palette.style.setProperty('--arrow-x', (r.left + r.width / 2 - left) + 'px');
+}
+
+slots.forEach(s => s.onclick = () => openPalette(s));
+
 function pickEmoji(e) {
   picked[activeSlot] = e;
-  slots[activeSlot].textContent = e || '?';
-  palette.hidden = true;
+  const s = slots[activeSlot];
+  s.textContent = e;
+  s.classList.add('filled');
   const next = picked.findIndex(p => !p);
-  if (next >= 0 && e) { activeSlot = next; palette.hidden = false; }
+  if (next >= 0) openPalette(slots[next]);
+  else palette.hidden = true;
+  maybeUnlock();
 }
+
 document.addEventListener('click', ev => {
   if (!palette.hidden && !palette.contains(ev.target) && !ev.target.classList.contains('slot'))
     palette.hidden = true;
 });
 
-// --- validation ---
+// --- validation auto ---
 const norm = s => s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ');
 const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
 
-function fail(msg) {
-  err.textContent = msg;
+function fail() {
+  err.textContent = 'Hmm, ce n\'est pas tout à fait ça… 🤔';
   err.classList.add('show');
   postit.classList.remove('shake');
   void postit.offsetWidth;
@@ -317,26 +316,23 @@ function fail(msg) {
   setTimeout(() => err.classList.remove('show'), 2600);
 }
 
-document.getElementById('lock').addEventListener('submit', async ev => {
-  ev.preventDefault();
-  palette.hidden = true;
-  if (words.some(w => !w.value.trim()) || picked.some(p => !p))
-    return fail('Il manque des mots ou des emojis… 👀');
-
+async function maybeUnlock() {
+  const full = words.every(w => w.value.length >= +w.maxLength) && picked.every(Boolean);
+  if (!full) return;
   const answer = words.map(w => norm(w.value)).join(' ') + ' ' + picked.join('');
+  if (answer === lastFailed) return;
   const h = hex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(answer)));
-  if (h !== EXPECTED) return fail('Hmm, ce n\'est pas tout à fait ça… 🤔');
+  if (h !== EXPECTED) { lastFailed = answer; return fail(); }
 
-  // succès — le tap sur le bouton autorise la lecture audio sur iOS
-  document.getElementById('go').style.display = 'none';
-  document.querySelector('.hint').style.display = 'none';
+  palette.hidden = true;
   postit.parentElement.style.display = 'none';
   err.style.display = 'none';
   document.getElementById('success').hidden = false;
   confetti();
-  const player = document.getElementById('player');
-  player.play().catch(() => {});
-});
+  document.getElementById('player').play().catch(() => {});
+}
+
+document.getElementById('lock').addEventListener('submit', ev => ev.preventDefault());
 
 function confetti() {
   const set = ['🎉','🎈','🎂','✨','🎊','💛'];
