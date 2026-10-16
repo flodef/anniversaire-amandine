@@ -109,7 +109,9 @@
   #bang { margin-left: 2px; }
 
   /* ---------- Emojis ---------- */
-  .line.emojis { gap: 2px; margin-top: 8px; align-items: center; }
+  .line.emojis { gap: 0; align-items: center; height: 0; margin: 0; min-height: 0; overflow: hidden; visibility: hidden; }
+  .line.emojis.show { height: auto; margin-top: 8px; visibility: visible; animation: pop .4s cubic-bezier(.2,1.6,.4,1); }
+  .slot[data-i="1"], .slot[data-i="2"] { margin-left: -10px; }
   .slot {
     width: 44px; height: 44px;
     font-size: 26px;
@@ -319,6 +321,7 @@ words.forEach((w, i) => {
   w.addEventListener('focus', centerPostit);
   w.addEventListener('input', async () => {
     if (wordOk[i]) return;
+    w.value = w.value.replace(/\P{L}/gu, '');
     if (i === 1) w.value = w.value.toUpperCase();
     else if (w.value) w.value = w.value[0].toUpperCase() + w.value.slice(1);
     w.classList.toggle('filled', !!w.value);
@@ -329,7 +332,10 @@ words.forEach((w, i) => {
     w.tabIndex = -1;
     w.classList.add('locked');
     if (i < words.length - 1) words[i + 1].focus(); else w.blur();
-    if (wordOk.every(Boolean)) document.getElementById('bang').hidden = false;
+    if (wordOk.every(Boolean)) {
+      document.getElementById('bang').hidden = false;
+      document.querySelector('.line.emojis').classList.add('show');
+    }
     maybeUnlock();
   });
   w.addEventListener('keydown', ev => {
