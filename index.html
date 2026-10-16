@@ -56,6 +56,9 @@
     background: rgba(255,255,255,.45);
     box-shadow: 0 1px 3px rgba(0,0,0,.15);
   }
+  .postit { animation: fadein .5s ease .1s backwards; }
+  @keyframes fadein { from { opacity: 0; } }
+
   .postit.shake { animation: shake .45s ease; }
   @keyframes shake {
     0%,100% { transform: rotate(-2.5deg) translateX(0); }
@@ -192,6 +195,101 @@
   }
   #turtle[hidden] { display: none; }
 
+  /* ---------- Popup indice ---------- */
+  .modal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 50;
+  }
+  .modal[hidden] { display: none; }
+  .modal-card {
+    background: #fffef5;
+    border-radius: 18px;
+    box-shadow: 0 16px 44px rgba(0,0,0,.5);
+    padding: 24px 20px;
+    width: min(82vw, 290px);
+    text-align: center;
+    font-size: 19px;
+    color: #333;
+    animation: pop .4s cubic-bezier(.2,1.6,.4,1);
+  }
+  .modal-card p { margin-bottom: 14px; }
+  .btn {
+    font-family: 'Kalam', cursive;
+    font-weight: 700;
+    font-size: 16px;
+    padding: 9px 18px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+  }
+  .btn:active { transform: scale(.95); }
+  .btn-yes { background: #2b3a8f; color: #fff; }
+  .btn-no { background: rgba(43,58,143,.12); color: #2b3a8f; }
+  .modal-btns { display: flex; gap: 10px; justify-content: center; }
+
+  /* ---------- Page indice (plage de nuit) ---------- */
+  #hints {
+    position: fixed; inset: 0;
+    z-index: 40;
+    background:
+      linear-gradient(rgba(10,14,55,.5), rgba(5,8,40,.78)),
+      url('plage.jpg') center / cover no-repeat;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  #hints[hidden] { display: none; }
+  .sea {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 36%;
+    overflow: hidden;
+  }
+  .sparkle {
+    position: absolute;
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: #dff1ff;
+    box-shadow: 0 0 6px 1px rgba(200,230,255,.9);
+    animation: twinkle ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; transform: scale(.5); }
+    50% { opacity: 1; transform: scale(1.15); }
+  }
+  #hintText {
+    margin-top: 52vh;
+    color: #fff;
+    font-size: clamp(21px, 5.6vw, 27px);
+    font-weight: 700;
+    text-align: center;
+    max-width: 310px;
+    min-height: 2.6em;
+    text-shadow: 0 2px 10px rgba(0,0,0,.55);
+    padding: 0 16px;
+  }
+  #hintText.typing::after {
+    content: '';
+    display: inline-block;
+    width: 2px; height: .9em;
+    background: #fff;
+    margin-left: 3px;
+    vertical-align: -.1em;
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  .hint-btns {
+    margin-top: auto;
+    margin-bottom: calc(28px + env(safe-area-inset-bottom));
+    display: flex; gap: 12px;
+  }
+  .hint-btns .btn {
+    background: rgba(255,255,255,.16);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.55);
+    backdrop-filter: blur(6px);
+  }
+
   /* ---------- Succès ---------- */
   .success {
     width: min(90vw, 340px);
@@ -256,14 +354,33 @@
 <div class="err" id="err"></div>
 <div class="palette" id="palette" hidden></div>
 
-<img id="turtle" src="tortue.png" alt="tortue en origami" hidden>
+<img id="turtle" data-src="tortue.png" alt="tortue en origami" hidden>
 
 <div class="success" id="success" hidden>
   <h1>Joyeux anniversaire&nbsp;!&nbsp;🎉</h1>
   <p>Ça t'évitera de disséquer encore un autre animal en papier 😜</p>
-  <audio id="player" src="message.m4a" controls playsinline preload="auto"></audio>
+  <audio id="player" src="message.m4a" controls playsinline preload="none"></audio>
   <br>
   <a href="message.m4a" download>⬇️ pour si tu veux le réécouter…</a>
+</div>
+
+<div class="modal" id="hintPrompt" hidden>
+  <div class="modal-card">
+    <p>Tu veux un petit indice&nbsp;? 🗝️</p>
+    <div class="modal-btns">
+      <button class="btn btn-no" id="hintNo">Non, je continue 💪</button>
+      <button class="btn btn-yes" id="hintYes">Oui !</button>
+    </div>
+  </div>
+</div>
+
+<div id="hints" hidden>
+  <div class="sea" id="sea"></div>
+  <p id="hintText"></p>
+  <div class="hint-btns">
+    <button class="btn" id="hintBack">← Retour</button>
+    <button class="btn" id="hintNext">Suivant →</button>
+  </div>
 </div>
 
 <script>
@@ -307,9 +424,11 @@ const FAIL_MSGS = [
   'Oulà, rappelle-toi tes cours de français ! 👩‍🏫',
 ];
 let failPool = [];
+let fails = 0;
 
 function fail() {
   if (!failPool.length) failPool = [...FAIL_MSGS].sort(() => Math.random() - .5);
+  if (++fails % 10 === 0) document.getElementById('hintPrompt').hidden = false;
   const r = postit.getBoundingClientRect();
   err.style.top = Math.min(r.bottom + 8, innerHeight - 56) + 'px';
   err.textContent = failPool.pop();
@@ -422,6 +541,61 @@ function maybeUnlock() {
 }
 
 document.getElementById('lock').addEventListener('submit', ev => ev.preventDefault());
+
+// --- indices : plage de nuit + lucioles ---
+const HINTS = [
+  'Dans le royaume des lucioles de mer',
+  'Un homme est venu déposer avant-hier',
+  'Une missive en ta demeure sans lumière',
+];
+const hints = document.getElementById('hints');
+const hintText = document.getElementById('hintText');
+const hintNext = document.getElementById('hintNext');
+let hintIdx = 0, typeTimer = null;
+
+const sea = document.getElementById('sea');
+for (let i = 0; i < 30; i++) {
+  const s = document.createElement('span');
+  s.className = 'sparkle';
+  s.style.left = Math.random() * 100 + '%';
+  s.style.top = Math.random() * 100 + '%';
+  s.style.animationDuration = (1.4 + Math.random() * 2.6) + 's';
+  s.style.animationDelay = (Math.random() * 3) + 's';
+  sea.appendChild(s);
+}
+
+function showHint() {
+  clearInterval(typeTimer);
+  const txt = HINTS[hintIdx];
+  hintText.textContent = '';
+  hintText.classList.add('typing');
+  let c = 0;
+  typeTimer = setInterval(() => {
+    hintText.textContent = txt.slice(0, ++c);
+    if (c >= txt.length) { clearInterval(typeTimer); hintText.classList.remove('typing'); }
+  }, 55);
+  hintNext.style.display = hintIdx === HINTS.length - 1 ? 'none' : '';
+}
+
+document.getElementById('hintYes').onclick = () => {
+  document.getElementById('hintPrompt').hidden = true;
+  document.activeElement?.blur();
+  hintIdx = 0;
+  hints.hidden = false;
+  showHint();
+};
+document.getElementById('hintNo').onclick = () => { document.getElementById('hintPrompt').hidden = true; };
+document.getElementById('hintBack').onclick = () => { hints.hidden = true; clearInterval(typeTimer); };
+hintNext.onclick = () => { hintIdx++; showHint(); };
+
+// --- préchargement en tâche de fond (après affichage papier + post-it) ---
+window.addEventListener('load', () => {
+  const p = document.getElementById('player');
+  p.preload = 'auto'; p.load();
+  const t = document.getElementById('turtle');
+  t.src = t.dataset.src;
+  new Image().src = 'plage.jpg';
+});
 
 function confetti() {
   const set = ['🎉','🎈','🎂','✨','🎊','💛'];
