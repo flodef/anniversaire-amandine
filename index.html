@@ -31,8 +31,8 @@
   /* ---------- Post-it ---------- */
   .postit {
     position: relative;
-    width: min(88vw, 340px);
-    padding: 36px 20px 28px;
+    width: min(84vw, 300px);
+    padding: 28px 16px 20px;
     background: linear-gradient(160deg, #fff7a1 0%, #ffef75 70%, #f9e966 100%);
     border-radius: 3px;
     box-shadow: 0 14px 30px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.3);
@@ -41,8 +41,8 @@
   .postit::before { /* scotch */
     content: '';
     position: absolute;
-    top: -14px; left: 50%;
-    width: 110px; height: 30px;
+    top: -13px; left: 50%;
+    width: 100px; height: 27px;
     transform: translateX(-50%) rotate(2deg);
     background: rgba(255,255,255,.45);
     box-shadow: 0 1px 3px rgba(0,0,0,.15);
@@ -60,16 +60,16 @@
     display: flex;
     justify-content: center;
     align-items: baseline;
-    gap: 10px;
-    margin: 8px 0;
-    min-height: 44px;
+    gap: 8px;
+    margin: 3px 0;
+    min-height: 38px;
   }
 
   .ink {
     font-family: 'Kalam', 'Comic Sans MS', cursive;
     font-weight: 700;
     color: #2b3a8f;
-    font-size: clamp(21px, 6.2vw, 27px);
+    font-size: clamp(20px, 5.8vw, 26px);
     letter-spacing: .02em;
   }
 
@@ -77,37 +77,42 @@
     font: inherit;
     color: inherit;
     text-align: center;
-    background: rgba(255,255,255,.18);
+    background: rgba(255,255,255,.45);
     border: none;
-    border-bottom: 2px dashed rgba(43,58,143,.45);
-    border-radius: 0;
+    border-radius: 5px;
     outline: none;
     padding: 0 2px 2px;
     -webkit-appearance: none;
     appearance: none;
     caret-color: #2b3a8f;
-    transition: background .2s, border-color .2s;
+    transition: background .2s;
   }
-  input.word:focus { background: rgba(255,255,255,.5); border-bottom-color: #2b3a8f; }
-  input.word.filled { background: none; border-bottom-color: transparent; }
-  input.word.filled:focus { background: rgba(255,255,255,.35); }
+  input.word:focus { background: rgba(255,255,255,.7); }
+  input.word.filled { background: none; }
+  input.word.filled:focus { background: rgba(255,255,255,.3); }
+  input.word.locked { cursor: default; }
+
+  #bang { margin-left: 2px; }
 
   /* ---------- Emojis ---------- */
-  .line.emojis { gap: 12px; margin-top: 12px; }
+  .line.emojis { gap: 2px; margin-top: 8px; }
   .slot {
-    width: 48px; height: 48px;
-    font-size: 30px;
+    width: 44px; height: 44px;
+    font-size: 26px;
     line-height: 1;
     display: flex; align-items: center; justify-content: center;
-    background: rgba(255,255,255,.25);
-    border: 2px dashed rgba(43,58,143,.45);
+    background: rgba(255,255,255,.45);
+    border: none;
     border-radius: 50%;
     cursor: pointer;
     font-family: 'Kalam', cursive;
     padding: 0;
+    transition: background .2s;
   }
   .slot:active { transform: scale(.92); }
-  .slot.filled { background: none; border-color: transparent; font-size: 34px; }
+  .slot.filled { background: none; font-size: 30px; }
+  .slot.locked { cursor: default; }
+  .slot[data-i="3"], .slot[data-i="4"] { margin-left: 14px; }
 
   /* ---------- Tooltip palette ---------- */
   .palette {
@@ -207,7 +212,7 @@
       <input class="word" id="w3" maxlength="6"  style="width:7.5ch"  enterkeyhint="next" autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="mot 3">
     </div>
     <div class="line ink">
-      <input class="word" id="w4" maxlength="12" style="width:14ch"   enterkeyhint="done" autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="mot 4">
+      <input class="word" id="w4" maxlength="12" style="width:14ch"   enterkeyhint="done" autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="mot 4"><span id="bang" hidden>!!</span>
     </div>
     <div class="line emojis">
       <button type="button" class="slot" data-i="0" aria-label="emoji 1"></button>
@@ -231,25 +236,57 @@
 </div>
 
 <script>
-const EXPECTED = '6f2f328fce79f798d03cb897db633b384795c4a33d1c37791a73bc64be513d85';
+const WORD_HASHES = [
+  'ed29bcecc78d7ffb672491c9440a4159f9aa81182f5b1fc32726a96ec10e0392', // Pour
+  '6374f5d8c2d3a9a572d4d00f1ac505e3d097c96560734c0488f23c6515afcbb8', // AMANDINE
+  'a4990bfdb3196fae64f66b646bc73f6cd1a2f115d5aad4d2bae0fb09bca7b1c8', // Joyeux
+  '542731404f186dfe16a7acd23cfaf6ff4eb53e15e71e12a4dc05963ba74eff46', // Anniversaire
+];
+const EMOJI_HASHES = [
+  '340ac0a3add29c1b128c72471294ed62196d634525d73bf88e5028e81aa5d378',
+  '340ac0a3add29c1b128c72471294ed62196d634525d73bf88e5028e81aa5d378',
+  '340ac0a3add29c1b128c72471294ed62196d634525d73bf88e5028e81aa5d378',
+  '23816c185bc1b04ffc0b4c0eb718c32dfd764adc33baf363fbf9bea8144a46ec',
+  '6146299cd54818a0e659eb6ac88e80f6f8f70536bbbd962d36973f2d2323f26c',
+];
 const EMOJIS = ['🎁','💐','⭐','🎂','🥳','🌸','🎈','🎊','❤️','🍾','🍰','🎉'];
 
 const words = ['w1','w2','w3','w4'].map(id => document.getElementById(id));
 const slots = [...document.querySelectorAll('.slot')];
-const picked = [null, null, null, null, null];
+const wordOk = [false, false, false, false];
+const emojiOk = [false, false, false, false, false];
 const palette = document.getElementById('palette');
 const err = document.getElementById('err');
 const postit = document.getElementById('postit');
 let activeSlot = 0;
-let lastFailed = '';
 
-// --- saisie : capitalisation + indicateur qui s'efface + auto-avance ---
+const norm = s => s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ');
+const sha = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))]
+  .map(b => b.toString(16).padStart(2, '0')).join('');
+
+function fail() {
+  err.textContent = 'Hmm, ce n\'est pas tout à fait ça… 🤔';
+  err.classList.add('show');
+  postit.classList.remove('shake');
+  void postit.offsetWidth;
+  postit.classList.add('shake');
+  setTimeout(() => err.classList.remove('show'), 2600);
+}
+
+// --- saisie : capitalisation, indicateur qui s'efface, verrouillage ---
 words.forEach((w, i) => {
-  w.addEventListener('input', () => {
+  w.addEventListener('input', async () => {
+    if (wordOk[i]) return;
     if (i === 1) w.value = w.value.toUpperCase();
     else if (w.value) w.value = w.value[0].toUpperCase() + w.value.slice(1);
     w.classList.toggle('filled', !!w.value);
-    if (w.value.length >= +w.maxLength && i < words.length - 1) words[i + 1].focus();
+    if (w.value.length < +w.maxLength) return;
+    if (await sha(norm(w.value)) !== WORD_HASHES[i]) return fail();
+    wordOk[i] = true;
+    w.readOnly = true;
+    w.classList.add('locked');
+    if (i < words.length - 1) words[i + 1].focus(); else w.blur();
+    if (wordOk.every(Boolean)) document.getElementById('bang').hidden = false;
     maybeUnlock();
   });
   w.addEventListener('keydown', ev => {
@@ -285,14 +322,18 @@ function openPalette(slot) {
   palette.style.setProperty('--arrow-x', (r.left + r.width / 2 - left) + 'px');
 }
 
-slots.forEach(s => s.onclick = () => openPalette(s));
+slots.forEach(s => s.onclick = () => { if (!emojiOk[+s.dataset.i]) openPalette(s); });
 
-function pickEmoji(e) {
-  picked[activeSlot] = e;
-  const s = slots[activeSlot];
+async function pickEmoji(e) {
+  const i = activeSlot;
+  if (emojiOk[i]) return;
+  const s = slots[i];
   s.textContent = e;
   s.classList.add('filled');
-  const next = picked.findIndex(p => !p);
+  if (await sha(e) !== EMOJI_HASHES[i]) { fail(); return openPalette(s); }
+  emojiOk[i] = true;
+  s.classList.add('locked');
+  const next = emojiOk.findIndex(ok => !ok);
   if (next >= 0) openPalette(slots[next]);
   else palette.hidden = true;
   maybeUnlock();
@@ -303,27 +344,9 @@ document.addEventListener('click', ev => {
     palette.hidden = true;
 });
 
-// --- validation auto ---
-const norm = s => s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ');
-const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
-
-function fail() {
-  err.textContent = 'Hmm, ce n\'est pas tout à fait ça… 🤔';
-  err.classList.add('show');
-  postit.classList.remove('shake');
-  void postit.offsetWidth;
-  postit.classList.add('shake');
-  setTimeout(() => err.classList.remove('show'), 2600);
-}
-
-async function maybeUnlock() {
-  const full = words.every(w => w.value.length >= +w.maxLength) && picked.every(Boolean);
-  if (!full) return;
-  const answer = words.map(w => norm(w.value)).join(' ') + ' ' + picked.join('');
-  if (answer === lastFailed) return;
-  const h = hex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(answer)));
-  if (h !== EXPECTED) { lastFailed = answer; return fail(); }
-
+// --- succès quand tout est verrouillé ---
+function maybeUnlock() {
+  if (!wordOk.every(Boolean) || !emojiOk.every(Boolean)) return;
   palette.hidden = true;
   postit.parentElement.style.display = 'none';
   err.style.display = 'none';
