@@ -120,9 +120,9 @@
   /* ---------- Emojis ---------- */
   .line.emojis { gap: 0; margin-top: 8px; align-items: center; visibility: hidden; }
   .line.emojis.show { visibility: visible; animation: pop .4s cubic-bezier(.2,1.6,.4,1); }
-  .slot[data-i="1"], .slot[data-i="2"] { margin-left: -10px; }
   .slot {
-    width: 44px; height: 44px;
+    position: relative;
+    width: 42px; height: 42px;
     font-size: 26px;
     line-height: 1;
     display: flex; align-items: center; justify-content: center;
@@ -134,8 +134,13 @@
     padding: 0;
     transition: background .2s;
   }
+  .slot::before { /* zone de clic étendue : les zones se chevauchent, pas de trou */
+    content: '';
+    position: absolute;
+    inset: -4px;
+  }
   .slot:active { transform: scale(.92); }
-  .slot.filled { background: none; font-size: 30px; }
+  .slot.filled { background: none; font-size: 34px; }
   .slot.locked { cursor: default; }
   .slot[data-i="3"], .slot[data-i="4"] { margin-left: 14px; }
 
@@ -367,9 +372,9 @@
 <div class="success" id="success" hidden>
   <h1>Joyeux anniversaire&nbsp;!&nbsp;🎉</h1>
   <p>Ça t'évitera de disséquer encore un autre animal en papier 😜</p>
-  <audio id="player" src="message.m4a" controls playsinline preload="none"></audio>
+  <audio id="player" src="à ma ama aimée.m4a" controls playsinline preload="none"></audio>
   <br>
-  <a href="message.m4a" download>⬇️ pour si tu veux le réécouter…</a>
+  <a href="à ma ama aimée.m4a" download>⬇️ pour si tu veux le réécouter…</a>
 </div>
 
 <div class="modal" id="hintPrompt" hidden>
@@ -411,6 +416,7 @@ const words = ['w1','w2','w3','w4'].map(id => document.getElementById(id));
 const slots = [...document.querySelectorAll('.slot')];
 const wordOk = [false, false, false, false];
 const emojiOk = [false, false, false, false, false];
+const picked = [null, null, null, null, null];
 const palette = document.getElementById('palette');
 const err = document.getElementById('err');
 const postit = document.getElementById('postit');
@@ -534,6 +540,8 @@ slots.forEach(s => s.onclick = () => { if (!emojiOk[+s.dataset.i]) openPalette(s
 async function pickEmoji(e) {
   const i = activeSlot;
   if (emojiOk[i]) return;
+  if (picked[i] === e) return;           // même emoji déjà choisi : rien de plus
+  picked[i] = e;
   const s = slots[i];
   s.textContent = e;
   s.classList.add('filled');
