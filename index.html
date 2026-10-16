@@ -90,7 +90,12 @@
   input.word:focus { background: rgba(255,255,255,.7); }
   input.word.filled { background: none; }
   input.word.filled:focus { background: rgba(255,255,255,.3); }
-  input.word.locked { cursor: default; }
+  input.word.locked {
+    cursor: default;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
 
   #bang { margin-left: 2px; }
 
@@ -299,6 +304,7 @@ words.forEach((w, i) => {
     if (await sha(norm(w.value)) !== WORD_HASHES[i]) return fail();
     wordOk[i] = true;
     w.readOnly = true;
+    w.tabIndex = -1;
     w.classList.add('locked');
     if (i < words.length - 1) words[i + 1].focus(); else w.blur();
     if (wordOk.every(Boolean)) document.getElementById('bang').hidden = false;
