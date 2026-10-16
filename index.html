@@ -158,7 +158,8 @@
     border-radius: 12px;
     opacity: 0;
     transition: opacity .25s;
-    white-space: nowrap;
+    max-width: 92vw;
+    text-align: center;
     z-index: 25;
   }
   .err.show { opacity: 1; }
@@ -264,8 +265,22 @@ const norm = s => s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036
 const sha = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))]
   .map(b => b.toString(16).padStart(2, '0')).join('');
 
+const FAIL_MSGS = [
+  'Hmm, ce n\'est pas tout à fait ça… 🤔',
+  'Essaie encore 😜',
+  'Tu y es presque… ou pas 😏',
+  'Aller James Bond 🕵️',
+  'Heureusement que ce n\'est pas une bombe à désamorcer 💣',
+  'C\'est pire que des chiffres et des lettres 🔤',
+  'Et tu crois que c\'est comme ça que je vais t\'embaucher ? 🧐',
+  'On dirait une apprentie hackeuse 🤓',
+  'Oulà, rappelle-toi de tes cours de français ! 👩‍🏫',
+];
+let failPool = [];
+
 function fail() {
-  err.textContent = 'Hmm, ce n\'est pas tout à fait ça… 🤔';
+  if (!failPool.length) failPool = [...FAIL_MSGS].sort(() => Math.random() - .5);
+  err.textContent = failPool.pop();
   err.classList.add('show');
   postit.classList.remove('shake');
   void postit.offsetWidth;
