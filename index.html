@@ -479,10 +479,15 @@ words.forEach((w, i) => {
   w.addEventListener('compositionupdate', () => {
     if (w.value.length > +w.maxLength) w.value = w.value.slice(0, +w.maxLength);
   });
-  // bloque le "fantome" IME quand le champ est plein (caractère affiché mais non inséré)
+  // champ plein : le caractère tapé remplace la dernière lettre (abcd + e -> abce)
+  // règle aussi le "fantome" IME mobile (ev.data contient le caractère même non inséré)
   w.addEventListener('beforeinput', ev => {
-    if (!wordOk[i] && w.value.length >= +w.maxLength && !ev.inputType.startsWith('delete'))
-      ev.preventDefault();
+    if (wordOk[i] || ev.inputType.startsWith('delete') || w.value.length < +w.maxLength) return;
+    ev.preventDefault();
+    const ch = (ev.data || '').replace(/\P{L}/gu, '').slice(-1);
+    if (!ch) return;
+    w.value = w.value.slice(0, +w.maxLength - 1) + ch;
+    w.dispatchEvent(new Event('input'));
   });
   w.addEventListener('keydown', ev => {
     if (ev.key === 'Enter') {
