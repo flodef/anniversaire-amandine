@@ -180,6 +180,10 @@
   }
   .err.show { opacity: 1; }
 
+  body.unlocked {
+    background: url('tortue.jpg') center / cover no-repeat fixed;
+  }
+
   /* ---------- Succès ---------- */
   .success {
     width: min(90vw, 340px);
@@ -246,7 +250,7 @@
 
 <div class="success" id="success" hidden>
   <h1>Joyeux anniversaire&nbsp;!&nbsp;🎉</h1>
-  <p>Ferme les yeux… et écoute&nbsp;:</p>
+  <p>Ça t'évitera de disséquer encore un autre animal en papier 😜</p>
   <audio id="player" src="message.m4a" controls playsinline preload="auto"></audio>
   <br>
   <a href="message.m4a" download>⬇️ Garder le message</a>
@@ -399,6 +403,7 @@ function maybeUnlock() {
   if (!wordOk.every(Boolean) || !emojiOk.every(Boolean)) return;
   palette.hidden = true;
   postit.parentElement.style.display = 'none';
+  document.body.classList.add('unlocked');
   err.style.display = 'none';
   document.getElementById('success').hidden = false;
   confetti();
