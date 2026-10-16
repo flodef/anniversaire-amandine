@@ -421,7 +421,7 @@ const FAIL_MSGS = [
   'Allez James Bond 🕵️',
   'Heureusement que ce n\'est pas une bombe à désamorcer 💣',
   'C\'est pire que des chiffres et des lettres 🔤',
-  'Et tu crois que c\'est comme ça que je vais t\'embaucher ? 🧐',
+  'C\'est comme ça que je vais t\'embaucher ? 🧐',
   'On dirait une apprentie hackeuse 🤓',
   'Oulà, rappelle-toi tes cours de français ! 👩‍🏫',
 ];
@@ -478,6 +478,11 @@ words.forEach((w, i) => {
   });
   w.addEventListener('compositionupdate', () => {
     if (w.value.length > +w.maxLength) w.value = w.value.slice(0, +w.maxLength);
+  });
+  // bloque le "fantome" IME quand le champ est plein (caractère affiché mais non inséré)
+  w.addEventListener('beforeinput', ev => {
+    if (!wordOk[i] && w.value.length >= +w.maxLength && !ev.inputType.startsWith('delete'))
+      ev.preventDefault();
   });
   w.addEventListener('keydown', ev => {
     if (ev.key === 'Enter') {
