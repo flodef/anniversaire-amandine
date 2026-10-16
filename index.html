@@ -172,13 +172,14 @@
     transform: translateX(-50%);
     color: #fff;
     background: rgba(180,30,30,.85);
-    font-size: 15px;
     padding: 6px 16px;
     border-radius: 12px;
     opacity: 0;
     transition: opacity .25s;
-    max-width: 92vw;
+    max-width: 94vw;
+    font-size: 14px;
     text-align: center;
+    text-wrap: balance;
     z-index: 25;
   }
   .err.show { opacity: 1; }
@@ -459,9 +460,8 @@ words.forEach((w, i) => {
   w.addEventListener('focus', centerPostit);
   w.addEventListener('input', async () => {
     if (wordOk[i]) return;
-    w.value = w.value.replace(/\P{L}/gu, '');
-    if (i === 1) w.value = w.value.toUpperCase();
-    else if (w.value) w.value = w.value[0].toUpperCase() + w.value.slice(1);
+    const clean = w.value.replace(/\P{L}/gu, '').slice(0, +w.maxLength);
+    w.value = i === 1 ? clean.toUpperCase() : (clean ? clean[0].toUpperCase() + clean.slice(1) : '');
     w.classList.toggle('filled', !!w.value);
     if (w.value.length < +w.maxLength) return;
     if (await sha(norm(w.value)) !== WORD_HASHES[i]) return fail();
@@ -475,6 +475,9 @@ words.forEach((w, i) => {
       document.querySelector('.line.emojis').classList.add('show');
     }
     maybeUnlock();
+  });
+  w.addEventListener('compositionupdate', () => {
+    if (w.value.length > +w.maxLength) w.value = w.value.slice(0, +w.maxLength);
   });
   w.addEventListener('keydown', ev => {
     if (ev.key === 'Enter') {
