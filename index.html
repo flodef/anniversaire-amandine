@@ -28,6 +28,15 @@
     overflow-x: hidden;
   }
 
+  @media (min-width: 700px) {
+    body {
+      background:
+        linear-gradient(rgba(0,0,0,.10), rgba(0,0,0,.22)),
+        url('papier.jpg') repeat fixed;
+      background-size: auto, 420px auto;
+    }
+  }
+
   /* ---------- Post-it ---------- */
   .postit {
     position: relative;
@@ -154,7 +163,7 @@
   /* ---------- Erreur ---------- */
   .err {
     position: fixed;
-    left: 50%; bottom: calc(20px + env(safe-area-inset-bottom));
+    left: 50%; top: calc(14px + env(safe-area-inset-top));
     transform: translateX(-50%);
     color: #fff;
     background: rgba(180,30,30,.85);
@@ -211,14 +220,14 @@
 <form id="lock" autocomplete="off">
   <div class="postit" id="postit">
     <div class="line ink">
-      <input class="word" id="w1" maxlength="4"  style="width:5ch"    enterkeyhint="next" autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="mot 1">
-      <input class="word" id="w2" maxlength="8"  style="width:10.5ch" enterkeyhint="next" autocapitalize="characters" autocorrect="off" spellcheck="false" aria-label="mot 2">
+      <input type="text" class="word" id="w1" maxlength="4"  style="width:5ch"    enterkeyhint="next" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="mot 1">
+      <input type="text" class="word" id="w2" maxlength="8"  style="width:10.5ch" enterkeyhint="next" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" aria-label="mot 2">
     </div>
     <div class="line ink">
-      <input class="word" id="w3" maxlength="6"  style="width:7.5ch"  enterkeyhint="next" autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="mot 3">
+      <input type="text" class="word" id="w3" maxlength="6"  style="width:7.5ch"  enterkeyhint="next" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="mot 3">
     </div>
     <div class="line ink">
-      <input class="word" id="w4" maxlength="12" style="width:14ch"   enterkeyhint="done" autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="mot 4"><span id="bang" hidden>!!</span>
+      <input type="text" class="word" id="w4" maxlength="12" style="width:14ch"   enterkeyhint="done" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="mot 4"><span id="bang" hidden>!!</span>
     </div>
     <div class="line emojis">
       <button type="button" class="slot" data-i="0" aria-label="emoji 1"></button>
@@ -293,8 +302,19 @@ function fail() {
   setTimeout(() => err.classList.remove('show'), 2600);
 }
 
+// --- recentrer le post-it dans la zone visible quand le clavier s'ouvre ---
+function centerPostit() {
+  setTimeout(() => postit.scrollIntoView({ block: 'center', behavior: 'smooth' }), 320);
+}
+if (window.visualViewport) {
+  visualViewport.addEventListener('resize', () => {
+    if (document.activeElement?.classList.contains('word')) centerPostit();
+  });
+}
+
 // --- saisie : capitalisation, indicateur qui s'efface, verrouillage ---
 words.forEach((w, i) => {
+  w.addEventListener('focus', centerPostit);
   w.addEventListener('input', async () => {
     if (wordOk[i]) return;
     if (i === 1) w.value = w.value.toUpperCase();
@@ -329,6 +349,7 @@ EMOJIS.forEach(e => {
 
 function openPalette(slot) {
   activeSlot = +slot.dataset.i;
+  if (document.activeElement?.classList.contains('word')) document.activeElement.blur();
   palette.hidden = false;
   const r = slot.getBoundingClientRect();
   const pw = palette.offsetWidth, ph = palette.offsetHeight;
