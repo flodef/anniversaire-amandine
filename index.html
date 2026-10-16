@@ -257,18 +257,19 @@
     0%, 100% { opacity: 0; transform: scale(.5); }
     50% { opacity: 1; transform: scale(1.15); }
   }
-  #hintText {
-    margin-top: 52vh;
+  #hintLines {
+    margin-top: 48vh;
     color: #fff;
-    font-size: clamp(21px, 5.6vw, 27px);
+    font-size: clamp(16px, 4.6vw, 21px);
     font-weight: 700;
     text-align: center;
-    max-width: 310px;
-    min-height: 2.6em;
+    min-height: 5.5em;
     text-shadow: 0 2px 10px rgba(0,0,0,.55);
-    padding: 0 16px;
+    padding: 0 12px;
+    display: flex; flex-direction: column; gap: 14px;
   }
-  #hintText.typing::after {
+  .hint-line { white-space: nowrap; }
+  .hint-line.typing::after {
     content: '';
     display: inline-block;
     width: 2px; height: .9em;
@@ -368,18 +369,18 @@
   <div class="modal-card">
     <p>Tu veux un petit indice&nbsp;? 🗝️</p>
     <div class="modal-btns">
-      <button class="btn btn-no" id="hintNo">Non, je continue 💪</button>
-      <button class="btn btn-yes" id="hintYes">Oui !</button>
+      <button class="btn btn-no" id="hintNo">Non 💪</button>
+      <button class="btn btn-yes" id="hintYes">Oui 🙏</button>
     </div>
   </div>
 </div>
 
 <div id="hints" hidden>
   <div class="sea" id="sea"></div>
-  <p id="hintText"></p>
+  <div id="hintLines"></div>
   <div class="hint-btns">
-    <button class="btn" id="hintBack">← Retour</button>
-    <button class="btn" id="hintNext">Suivant →</button>
+    <button class="btn" id="hintBack">J'ai trouvé !</button>
+    <button class="btn" id="hintNext">Un autre stp</button>
   </div>
 </div>
 
@@ -549,9 +550,9 @@ const HINTS = [
   'Une missive en ta demeure sans lumière',
 ];
 const hints = document.getElementById('hints');
-const hintText = document.getElementById('hintText');
+const hintLines = document.getElementById('hintLines');
 const hintNext = document.getElementById('hintNext');
-let hintIdx = 0, typeTimer = null;
+let nextHint = 0, typeTimer = null;
 
 const sea = document.getElementById('sea');
 for (let i = 0; i < 30; i++) {
@@ -564,29 +565,40 @@ for (let i = 0; i < 30; i++) {
   sea.appendChild(s);
 }
 
-function showHint() {
-  clearInterval(typeTimer);
-  const txt = HINTS[hintIdx];
-  hintText.textContent = '';
-  hintText.classList.add('typing');
+function renderHint(i, instant) {
+  const p = document.createElement('p');
+  p.className = 'hint-line' + (instant ? '' : ' typing');
+  hintLines.appendChild(p);
+  const txt = HINTS[i];
+  if (instant) { p.textContent = txt; return; }
   let c = 0;
+  clearInterval(typeTimer);
   typeTimer = setInterval(() => {
-    hintText.textContent = txt.slice(0, ++c);
-    if (c >= txt.length) { clearInterval(typeTimer); hintText.classList.remove('typing'); }
+    p.textContent = txt.slice(0, ++c);
+    if (c >= txt.length) { clearInterval(typeTimer); p.classList.remove('typing'); }
   }, 55);
-  hintNext.style.display = hintIdx === HINTS.length - 1 ? 'none' : '';
+}
+
+function refreshNextBtn() {
+  hintNext.style.display = nextHint < HINTS.length ? '' : 'none';
+}
+
+function openHints() {
+  hints.hidden = false;
+  hintLines.innerHTML = '';
+  for (let i = 0; i < nextHint; i++) renderHint(i, true);
+  if (nextHint < HINTS.length) renderHint(nextHint++);
+  refreshNextBtn();
 }
 
 document.getElementById('hintYes').onclick = () => {
   document.getElementById('hintPrompt').hidden = true;
   document.activeElement?.blur();
-  hintIdx = 0;
-  hints.hidden = false;
-  showHint();
+  openHints();
 };
 document.getElementById('hintNo').onclick = () => { document.getElementById('hintPrompt').hidden = true; };
 document.getElementById('hintBack').onclick = () => { hints.hidden = true; clearInterval(typeTimer); };
-hintNext.onclick = () => { hintIdx++; showHint(); };
+hintNext.onclick = () => { if (nextHint < HINTS.length) renderHint(nextHint++); refreshNextBtn(); };
 
 // --- préchargement en tâche de fond (après affichage papier + post-it) ---
 window.addEventListener('load', () => {
