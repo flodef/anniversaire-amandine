@@ -181,8 +181,16 @@
   .err.show { opacity: 1; }
 
   body.unlocked {
-    background: url('tortue.jpg') center / cover no-repeat fixed;
+    background: url('sable.jpg') center / cover no-repeat fixed;
   }
+
+  #turtle {
+    width: min(58vw, 230px);
+    transform: rotate(-5deg);
+    filter: drop-shadow(0 10px 12px rgba(90,60,20,.45));
+    animation: pop .6s cubic-bezier(.2,1.6,.4,1) .15s backwards;
+  }
+  #turtle[hidden] { display: none; }
 
   /* ---------- Succès ---------- */
   .success {
@@ -248,12 +256,14 @@
 <div class="err" id="err"></div>
 <div class="palette" id="palette" hidden></div>
 
+<img id="turtle" src="tortue.png" alt="tortue en origami" hidden>
+
 <div class="success" id="success" hidden>
   <h1>Joyeux anniversaire&nbsp;!&nbsp;🎉</h1>
   <p>Ça t'évitera de disséquer encore un autre animal en papier 😜</p>
   <audio id="player" src="message.m4a" controls playsinline preload="auto"></audio>
   <br>
-  <a href="message.m4a" download>⬇️ Garder le message</a>
+  <a href="message.m4a" download>⬇️ pour si tu veux le réécouter…</a>
 </div>
 
 <script>
@@ -405,6 +415,7 @@ function maybeUnlock() {
   postit.parentElement.style.display = 'none';
   document.body.classList.add('unlocked');
   err.style.display = 'none';
+  document.getElementById('turtle').hidden = false;
   document.getElementById('success').hidden = false;
   confetti();
   document.getElementById('player').play().catch(() => {});
