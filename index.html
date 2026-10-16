@@ -192,16 +192,6 @@
   }
   #turtle[hidden] { display: none; }
 
-  /* ---------- Déco plage ---------- */
-  .deco {
-    position: fixed;
-    z-index: 1;
-    pointer-events: none;
-    opacity: 0;
-    animation: fadein .8s ease forwards;
-  }
-  @keyframes fadein { to { opacity: 1; } }
-
   /* ---------- Succès ---------- */
   .success {
     width: min(90vw, 340px);
@@ -265,16 +255,6 @@
 
 <div class="err" id="err"></div>
 <div class="palette" id="palette" hidden></div>
-
-<div id="beach" hidden>
-  <span class="deco" style="top:6%;  left:5%;   font-size:44px; transform:rotate(-15deg)">⭐</span>
-  <span class="deco" style="top:12%; right:7%;  font-size:36px; transform:rotate(20deg); animation-delay:.1s">🐚</span>
-  <span class="deco" style="top:38%; left:4%;   font-size:30px; transform:rotate(30deg); animation-delay:.2s">🐚</span>
-  <span class="deco" style="top:60%; right:5%;  font-size:42px; transform:rotate(-25deg); animation-delay:.15s">⭐</span>
-  <span class="deco" style="bottom:8%; left:9%; font-size:38px; transform:rotate(10deg); animation-delay:.25s">⭐</span>
-  <span class="deco" style="bottom:14%; right:10%; font-size:32px; transform:rotate(-10deg); animation-delay:.05s">🐚</span>
-  <span class="deco" style="bottom:30%; left:7%; font-size:28px; transform:rotate(45deg); animation-delay:.3s">🦀</span>
-</div>
 
 <img id="turtle" src="tortue.png" alt="tortue en origami" hidden>
 
@@ -436,7 +416,6 @@ function maybeUnlock() {
   document.body.classList.add('unlocked');
   err.style.display = 'none';
   document.getElementById('turtle').hidden = false;
-  document.getElementById('beach').hidden = false;
   document.getElementById('success').hidden = false;
   confetti();
   document.getElementById('player').play().catch(() => {});
