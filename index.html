@@ -197,10 +197,11 @@
   .err.show { opacity: 1; }
 
   /* ---------- Cœurs d'essais ---------- */
+  .stage { position: relative; }
   #hearts {
-    position: fixed;
-    top: calc(12px + env(safe-area-inset-top));
+    position: absolute;
     left: 50%;
+    bottom: calc(100% + 10px);
     transform: translateX(-50%);
     display: flex;
     gap: 3px;
@@ -208,6 +209,7 @@
     line-height: 1;
     opacity: 0;
     transition: opacity .25s;
+    white-space: nowrap;
     z-index: 26;
     pointer-events: none;
   }
@@ -360,6 +362,8 @@
 </head>
 <body>
 
+<div class="stage">
+<div id="hearts" aria-hidden="true"></div>
 <form id="lock" autocomplete="off">
   <div class="postit" id="postit">
     <div class="line ink">
@@ -381,9 +385,9 @@
     </div>
   </div>
 </form>
+</div>
 
 <div class="err" id="err"></div>
-<div id="hearts" aria-hidden="true"></div>
 <div class="palette" id="palette" hidden></div>
 
 <img id="turtle" data-src="tortue.png" alt="tortue en origami" hidden>
@@ -475,7 +479,7 @@ function fail() {
   clearTimeout(errTimer);
   const used = ((fails - 1) % 10) + 1;
   const hearts = document.getElementById('hearts');
-  hearts.innerHTML = '❤️'.repeat(10 - used) + '🤍'.repeat(used);
+  hearts.innerHTML = Array.from({ length: 10 }, (_, i) => `<span>${i < 10 - used ? '❤️' : '🤍'}</span>`).join('');
   hearts.classList.add('show');
   errTimer = setTimeout(() => {
     err.classList.remove('show');
