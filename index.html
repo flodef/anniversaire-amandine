@@ -196,6 +196,23 @@
   }
   .err.show { opacity: 1; }
 
+  /* ---------- Cœurs d'essais ---------- */
+  #hearts {
+    position: fixed;
+    top: calc(12px + env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 3px;
+    font-size: 17px;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity .25s;
+    z-index: 26;
+    pointer-events: none;
+  }
+  #hearts.show { opacity: 1; }
+
   body.unlocked {
     background: url('plage.jpg') center / cover no-repeat fixed;
   }
@@ -366,6 +383,7 @@
 </form>
 
 <div class="err" id="err"></div>
+<div id="hearts" aria-hidden="true"></div>
 <div class="palette" id="palette" hidden></div>
 
 <img id="turtle" data-src="tortue.png" alt="tortue en origami" hidden>
@@ -455,7 +473,14 @@ function fail() {
   void postit.offsetWidth;
   postit.classList.add('shake');
   clearTimeout(errTimer);
-  errTimer = setTimeout(() => err.classList.remove('show'), 2600);
+  const used = ((fails - 1) % 10) + 1;
+  const hearts = document.getElementById('hearts');
+  hearts.innerHTML = '❤️'.repeat(10 - used) + '🤍'.repeat(used);
+  hearts.classList.add('show');
+  errTimer = setTimeout(() => {
+    err.classList.remove('show');
+    hearts.classList.remove('show');
+  }, 2600);
 }
 
 // --- recentrer le post-it dans la zone visible quand le clavier s'ouvre ---
